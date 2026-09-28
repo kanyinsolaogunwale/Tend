@@ -1,11 +1,14 @@
 import type { Task } from "./types";
 
-const STORAGE_KEY = "tend.tasks.v1";
-const WELCOME_KEY = "tend.welcomed.v1";
+/** v2: fresh start for everyone. v1 (which seeded samples) is deliberately ignored. */
+const STORAGE_KEY = "tend.tasks.v2";
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 /** Coerce unknown parsed JSON into a valid Task, or null. */
 function sanitizeTask(raw: unknown): Task | null {
@@ -17,9 +20,9 @@ function sanitizeTask(raw: unknown): Task | null {
     title,
     description: typeof raw.description === "string" ? raw.description : "",
     dueDate:
-      typeof raw.dueDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(raw.dueDate)
-        ? raw.dueDate
-        : null,
+      typeof raw.dueDate === "string" && DATE_RE.test(raw.dueDate) ? raw.dueDate : null,
+    dueTime:
+      typeof raw.dueTime === "string" && TIME_RE.test(raw.dueTime) ? raw.dueTime : null,
     priority: raw.priority === "high" || raw.priority === "low" ? raw.priority : "normal",
     completed: raw.completed === true,
     createdAt: typeof raw.createdAt === "number" ? raw.createdAt : Date.now(),
@@ -44,22 +47,6 @@ export function saveTasks(tasks: Task[]): void {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
   } catch {
-    // Storage can be unavailable (private mode / quota) — the app still works in-memory.
-  }
-}
-
-export function hasSeenWelcome(): boolean {
-  try {
-    return window.localStorage.getItem(WELCOME_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-export function markWelcomed(): void {
-  try {
-    window.localStorage.setItem(WELCOME_KEY, "1");
-  } catch {
-    // ignore
+    // Storage can be unavailable (private mode / quota); the app still works in-memory.
   }
 }

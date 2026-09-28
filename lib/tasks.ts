@@ -1,3 +1,4 @@
+import { nowHHMM, todayISO } from "./dates";
 import type { Filter, Task } from "./types";
 
 /**
@@ -22,7 +23,18 @@ export function matchesFilter(
   }
 }
 
+/** A task is overdue once its date has passed, or its time today has passed. */
+export function isTaskOverdue(task: Task, today: string = todayISO()): boolean {
+  if (task.completed || task.dueDate === null) return false;
+  if (task.dueDate < today) return true;
+  if (task.dueDate === today && task.dueTime !== null) {
+    return task.dueTime < nowHHMM();
+  }
+  return false;
+}
+
 const PRIORITY_RANK = { high: 0, normal: 1, low: 2 } as const;
+const NO_TIME = "99:99"; // sorts after every valid "HH:MM"
 
 /** Stable, human-logical display order for any filtered list. */
 export function sortTasks(list: Task[]): Task[] {
@@ -34,8 +46,8 @@ export function sortTasks(list: Task[]): Task[] {
       return (b.completedAt ?? b.createdAt) - (a.completedAt ?? a.createdAt);
     }
     // Overdue first…
-    const aOver = a.dueDate !== null && a.dueDate < today;
-    const bOver = b.dueDate !== null && b.dueDate < today;
+    const aOver = isTaskOverdue(a, today);
+    const bOver = isTaskOverdue(b, today);
     if (aOver !== bOver) return aOver ? -1 : 1;
     // …then earliest due date; undated tasks trail dated ones.
     if (a.dueDate !== b.dueDate) {
@@ -43,6 +55,10 @@ export function sortTasks(list: Task[]): Task[] {
       if (b.dueDate === null) return -1;
       return a.dueDate < b.dueDate ? -1 : 1;
     }
+    // Same date: earlier time first; untimed tasks last.
+    const at = a.dueTime ?? NO_TIME;
+    const bt = b.dueTime ?? NO_TIME;
+    if (at !== bt) return at < bt ? -1 : 1;
     // Then higher priority.
     if (PRIORITY_RANK[a.priority] !== PRIORITY_RANK[b.priority]) {
       return PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
@@ -53,12 +69,5 @@ export function sortTasks(list: Task[]): Task[] {
 }
 
 function todayISODate(): string {
-  return localISO(new Date());
-}
-
-function localISO(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  return todayISO();
 }

@@ -22,6 +22,7 @@ export function useTasks(): {
   updateTask: (id: string, patch: TaskPatch) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
+  deleteManyTasks: (ids: string[]) => void;
   clearCompleted: () => void;
 } {
   const snapshot = useSyncExternalStore(
@@ -37,6 +38,7 @@ export function useTasks(): {
     updateTask: taskActions.update,
     toggleTask: taskActions.toggle,
     deleteTask: taskActions.remove,
+    deleteManyTasks: taskActions.removeMany,
     clearCompleted: taskActions.clearCompleted,
   };
 }

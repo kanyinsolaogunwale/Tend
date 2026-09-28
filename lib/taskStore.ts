@@ -1,5 +1,4 @@
-import { sampleTasks } from "./sample";
-import { hasSeenWelcome, loadTasks, markWelcomed, saveTasks } from "./storage";
+import { loadTasks, saveTasks } from "./storage";
 import type { Task, TaskInput } from "./types";
 import type { TaskPatch } from "./store-types";
 import { uid } from "./utils";
@@ -9,7 +8,7 @@ type Listener = () => void;
 /**
  * Module-level store owning the task list.
  * - `null` means "not hydrated yet" (server snapshot / first client paint → skeleton).
- * - Loaded once per browser session from localStorage, seeding samples on first visit.
+ * - New users always start with an empty list (no seeded sample tasks).
  */
 let tasks: Task[] | null = null;
 const listeners = new Set<Listener>();
@@ -18,15 +17,7 @@ const EMPTY: Task[] = [];
 
 function ensureLoaded(): Task[] {
   if (tasks === null) {
-    const stored = loadTasks();
-    if (stored !== null) {
-      tasks = stored;
-    } else if (!hasSeenWelcome()) {
-      tasks = sampleTasks();
-      markWelcomed();
-    } else {
-      tasks = EMPTY;
-    }
+    tasks = loadTasks() ?? EMPTY;
     saveTasks(tasks);
   }
   return tasks;
@@ -51,12 +42,12 @@ export function subscribeTasks(listener: Listener): () => void {
   };
 }
 
-/** Client snapshot — stable reference between mutations. */
+/** Client snapshot: stable reference between mutations. */
 export function getTasksSnapshot(): Task[] {
   return ensureLoaded();
 }
 
-/** Server snapshot — null so SSR and first paint render the skeleton. */
+/** Server snapshot: null so SSR and first paint render the skeleton. */
 export function getServerTasksSnapshot(): Task[] | null {
   return null;
 }
@@ -68,6 +59,7 @@ export const taskActions = {
       title: input.title.trim(),
       description: input.description.trim(),
       dueDate: input.dueDate,
+      dueTime: input.dueTime,
       priority: input.priority,
       completed: false,
       createdAt: Date.now(),
@@ -92,6 +84,11 @@ export const taskActions = {
 
   remove(id: string): void {
     commit(ensureLoaded().filter((t) => t.id !== id));
+  },
+
+  removeMany(ids: string[]): void {
+    const set = new Set(ids);
+    commit(ensureLoaded().filter((t) => !set.has(t.id)));
   },
 
   clearCompleted(): void {

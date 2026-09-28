@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tend — a calm to-do list",
+  title: "Tend: a calm to-do list",
   description:
     "Tend is a minimalist to-do app: capture tasks with optional descriptions, due dates and priorities, then work through Today, Upcoming, Completed or everything.",
 };

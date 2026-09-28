@@ -6,6 +6,8 @@ export type Task = {
   description: string;
   /** Local calendar date, "YYYY-MM-DD". Null = no due date. */
   dueDate: string | null;
+  /** Local time of day, "HH:MM" (24h). Null = no specific time. */
+  dueTime: string | null;
   priority: Priority;
   completed: boolean;
   createdAt: number;
@@ -17,6 +19,7 @@ export type TaskInput = {
   title: string;
   description: string;
   dueDate: string | null;
+  dueTime: string | null;
   priority: Priority;
 };
 

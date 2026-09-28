@@ -11,7 +11,13 @@ export function todayISO(): string {
   return toISODate(new Date());
 }
 
-/** Parse "YYYY-MM-DD" as a local date (never UTC — avoids off-by-one bugs). */
+/** Current local time as "HH:MM" (24h). */
+export function nowHHMM(): string {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+/** Parse "YYYY-MM-DD" as a local date (never UTC; avoids off-by-one bugs). */
 export function parseISODate(iso: string): Date {
   const [y, m, d] = iso.split("-").map(Number);
   return new Date(y ?? 1970, (m ?? 1) - 1, d ?? 1);
@@ -42,4 +48,12 @@ export function formatDueLabel(iso: string, today: string = todayISO()): string 
   if (d.getFullYear() !== new Date().getFullYear()) opts.year = "numeric";
   else if (Math.abs(delta) <= 6) opts.weekday = "short";
   return d.toLocaleDateString(undefined, opts);
+}
+
+/** Human label for a "HH:MM" time: "9:00 AM", "2:30 PM"… */
+export function formatTimeLabel(hhmm: string): string {
+  const [h, m] = hhmm.split(":").map(Number);
+  const d = new Date();
+  d.setHours(h ?? 0, m ?? 0, 0, 0);
+  return d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 }

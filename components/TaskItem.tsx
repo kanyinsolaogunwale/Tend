@@ -1,7 +1,8 @@
 "use client";
 
-import { Check, Pencil, Trash2 } from "lucide-react";
-import { formatDueLabel } from "@/lib/dates";
+import { Check, Clock, Pencil, Trash2 } from "lucide-react";
+import { formatDueLabel, formatTimeLabel } from "@/lib/dates";
+import { isTaskOverdue } from "@/lib/tasks";
 import type { Task } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -21,25 +22,25 @@ const PRIORITY_META = {
 } as const;
 
 export function TaskItem({ task, today, onToggle, onEdit, onDelete, exiting }: Props) {
-  const overdue = !task.completed && task.dueDate !== null && task.dueDate < today;
+  const overdue = isTaskOverdue(task, today);
   const dueToday = !task.completed && task.dueDate === today;
   const priority = PRIORITY_META[task.priority];
 
   return (
     <li
       className={cn(
-        "task-enter group relative flex items-start gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3.5 shadow-sm transition-all duration-200 hover:border-zinc-300 hover:shadow",
+        "task-enter group relative flex items-start gap-3 overflow-hidden rounded-2xl border border-zinc-200/80 bg-white p-3.5 pl-4.5 shadow-sm transition-all duration-200 hover:border-zinc-300 hover:shadow",
         task.completed && "bg-zinc-50/80",
         exiting && "task-exit",
       )}
     >
-      {/* Priority accent rail */}
+      {/* Priority accent rail: full height, hugging the card's left edge */}
       <span
         aria-hidden
         className={cn(
-          "absolute inset-y-2.5 left-0 w-1 rounded-full transition-opacity",
-          task.completed ? "bg-emerald-400 opacity-60" : priority.dot,
-          !task.completed && "opacity-70 group-hover:opacity-100",
+          "absolute inset-y-0 left-0 w-1.5 rounded-l-[15px] transition-opacity",
+          task.completed ? "bg-emerald-400 opacity-70" : priority.dot,
+          !task.completed && "opacity-80 group-hover:opacity-100",
         )}
       />
 
@@ -64,8 +65,10 @@ export function TaskItem({ task, today, onToggle, onEdit, onDelete, exiting }: P
       <div className="min-w-0 flex-1">
         <p
           className={cn(
-            "break-words text-[0.95rem] font-medium leading-snug text-zinc-900 transition-colors",
-            task.completed && "text-zinc-400 line-through decoration-zinc-300",
+            "break-words text-[0.95rem] font-medium leading-snug transition-colors",
+            task.completed
+              ? "text-zinc-400 line-through decoration-zinc-400"
+              : "text-zinc-900",
           )}
         >
           {task.title}
@@ -73,8 +76,8 @@ export function TaskItem({ task, today, onToggle, onEdit, onDelete, exiting }: P
         {task.description !== "" && (
           <p
             className={cn(
-              "mt-1 break-words text-sm leading-snug text-zinc-500",
-              task.completed && "text-zinc-400",
+              "mt-1 break-words text-sm leading-snug",
+              task.completed ? "text-zinc-400" : "text-zinc-500",
             )}
           >
             {task.description}
@@ -97,6 +100,12 @@ export function TaskItem({ task, today, onToggle, onEdit, onDelete, exiting }: P
               {formatDueLabel(task.dueDate, today)}
             </span>
           )}
+          {task.dueTime !== null && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-zinc-50 px-2 py-0.5 text-xs font-medium text-zinc-600 ring-1 ring-inset ring-zinc-200">
+              <Clock className="size-3" aria-hidden />
+              {formatTimeLabel(task.dueTime)}
+            </span>
+          )}
           <span
             className={cn(
               "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset",
@@ -111,7 +120,7 @@ export function TaskItem({ task, today, onToggle, onEdit, onDelete, exiting }: P
         </div>
       </div>
 
-      {/* Actions — always visible on touch, on hover on desktop */}
+      {/* Actions: always visible on touch, on hover on desktop */}
       <div className="flex shrink-0 items-center gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
         <button
           type="button"
