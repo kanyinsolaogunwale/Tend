@@ -51,7 +51,7 @@ export function FilterTabs({ filter, onChange, counts }: Props) {
             className={cn(
               "flex h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40",
               active
-                ? "bg-accent text-white shadow-sm"
+                ? "bg-accent/12 text-accent"
                 : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-800",
             )}
           >
@@ -60,7 +60,7 @@ export function FilterTabs({ filter, onChange, counts }: Props) {
             <span
               className={cn(
                 "min-w-5 rounded-full px-1.5 py-0.5 text-[0.68rem] font-semibold leading-4",
-                active ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-500",
+                active ? "bg-accent/20 text-accent" : "bg-zinc-100 text-zinc-500",
               )}
             >
               {counts[id]}

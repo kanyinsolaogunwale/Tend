@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { CalendarClock, CheckCircle2, ChevronDown, ChevronUp, ListChecks, Plus, Sun, Trash2 } from "lucide-react";
 import { ConfirmDialog, type ConfirmState } from "@/components/ConfirmDialog";
 import { FilterTabs } from "@/components/FilterTabs";
+import { TendMark } from "@/components/TendLogo";
 import { TaskForm } from "@/components/TaskForm";
 import { TaskItem } from "@/components/TaskItem";
 import { todayISO } from "@/lib/dates";
@@ -124,10 +125,8 @@ export function TodoApp() {
     <div className="mx-auto w-full max-w-xl px-4 pb-16 pt-10 sm:px-6 sm:pb-20 sm:pt-14">
       {/* Header: logo + name only */}
       <header className="animate-fade-in">
-        <div className="flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-2xl bg-accent text-white shadow-sm shadow-accent/30">
-            <ListChecks className="size-6" aria-hidden />
-          </span>
+        <div className="flex items-center gap-2.5">
+          <TendMark className="size-9 text-accent sm:size-10" />
           <h1 className="text-[1.7rem] font-semibold tracking-tight text-zinc-900">Tend</h1>
         </div>
 
