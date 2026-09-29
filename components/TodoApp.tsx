@@ -126,7 +126,7 @@ export function TodoApp() {
       {/* Header: logo + name only */}
       <header className="animate-fade-in">
         <div className="flex items-center gap-2.5">
-          <TendMark className="size-9 text-accent sm:size-10" />
+          <TendMark className="h-9 w-auto text-accent sm:h-10" />
           <h1 className="text-[1.7rem] font-semibold tracking-tight text-zinc-900">Tend</h1>
         </div>
 
